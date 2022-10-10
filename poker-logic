@@ -1,0 +1,18 @@
+/*
+
+*/
+
+String cards[4][13] = {{"Clubs", "Diamonds", "Hearts", "Spades"}, {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}};
+void setup() {
+  Serial.begin(9600);
+  for(int s=1; s<5; s++){
+    for(int c=1; c<14; c++){
+    Serial.print(cards[s][c]);
+    }
+    }
+}
+
+
+void loop(){
+  
+}
