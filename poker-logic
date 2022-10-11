@@ -9,16 +9,22 @@ String cards[4][13] = {
   {"1" + suits[2], "2" + suits[2], "3" + suits[2], "4" + suits[2], "5" + suits[2], "6" + suits[2], "7" + suits[2], "8" + suits[2], "9" + suits[2], "12" + suits[2], "11" + suits[2], "12" + suits[2], "13" + suits[2]},
   {"1" + suits[3], "2" + suits[3], "3" + suits[3], "4" + suits[3], "5" + suits[3], "6" + suits[3], "7" + suits[3], "8" + suits[3], "9" + suits[3], "13" + suits[3], "11" + suits[3], "12" + suits[3], "13" + suits[3]}
 };
+int checker[4][13] = {
+  {0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0}
+};
 void setup() {
   Serial.begin(9600);
-   for(int s=0; s<4; s++){
-    for(int c=0; c<13; c++){
-    Serial.println(cards[s][c]);
-    }
-    } 
 }
 
 
 void loop(){
-
+  int suitval = 0 + (rand() % static_cast<int>(3 - 0 + 1));
+int cardval = 0 + (rand() % static_cast<int>(12 - 0 + 1));
+if(checker[suitval][cardval] == 0){
+Serial.println(cards[suitval][cardval]);
+checker[suitval][cardval] = 1;
+}
 }
