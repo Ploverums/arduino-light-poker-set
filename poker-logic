@@ -1,7 +1,10 @@
 /*
 SET UP FOR BLACKJACK: ADJUST FOR POKER
 */
-
+int total1 = 0;
+int total2 = 0;
+int total3 = 0;
+int total4 = 0;
 String suits[4] = {" Clubs", " Diamonds", " Hearts", " Spades"};
 String cards[4][13] = {
   {"1" + suits[0], "2" + suits[0], "3" + suits[0], "4" + suits[0], "5" + suits[0], "6" + suits[0], "7" + suits[0], "8" + suits[0], "9" + suits[0], "10" + suits[0], "11" + suits[0], "12" + suits[0], "13" + suits[0]},
@@ -50,6 +53,18 @@ void setup() {
   Serial.print(x);
   Serial.print(" TOTAL:");
   Serial.println(playertotal);
+  if(x == 1){
+  total1 = playertotal;
+  }
+  if(x == 2){
+  total2 = playertotal;
+  }
+  if(x == 3){
+  total3 = playertotal;
+  }
+  if(x == 4){
+  total4 = playertotal;
+  }
    Serial.println("-------------------------------------");
   }
 }
@@ -65,12 +80,14 @@ void loop(){
 buttonState = digitalRead(buttonPin);
 if(buttonState == HIGH && buttonPressed == 0){
   buttonPressed = 1; 
-  drawCard();
+  hit();
 }
 if(buttonState == LOW && buttonPressed == 1){
   buttonPressed = 0;
 
 }
+bust();
+
 }
 
 int drawTwo(int player){
@@ -114,11 +131,29 @@ if(turn == 2){
 }
 }
 void bust(){
-  
+if(total1 > 21){
+  Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
+  delay(10000);
+}
 } 
 
 void hit(){
-  
+  if(total1 != 21){
+    int hitCard = drawCard();
+    if(hitCard == 21){
+      if((total1 + 11) > 21){
+        hitCard = 1;
+      }
+      else{
+        hitCard = 11;
+      }
+    }
+    Serial.print("HIT: CARD DRAWN ");
+    Serial.println(hitCard);
+    total1 += hitCard;
+    Serial.print("NEW TOTAL: ");
+    Serial.println(total1);
+  }
 }
 void stand(){
   
