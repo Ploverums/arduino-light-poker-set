@@ -5,6 +5,8 @@ int total1 = 0;
 int total2 = 0;
 int total3 = 0;
 int total4 = 0;
+int currentPlayerTotal = 0;
+int currentPlayer = 1;
 String suits[4] = {" Clubs", " Diamonds", " Hearts", " Spades"};
 String cards[4][13] = {
   {"1" + suits[0], "2" + suits[0], "3" + suits[0], "4" + suits[0], "5" + suits[0], "6" + suits[0], "7" + suits[0], "8" + suits[0], "9" + suits[0], "10" + suits[0], "11" + suits[0], "12" + suits[0], "13" + suits[0]},
@@ -41,11 +43,13 @@ else{
 }
 }
 int turn = 0;
-const int buttonPin = 2;
-int buttonState = 0;
+const int hitButtonPin = 2;
+int hitButtonState = 0;
+const int standButtonPin = 3;
+int standButtonState = 0;
 void setup() {
   srand(analogRead(0));
-  pinMode(buttonPin, INPUT);
+  pinMode(hitButtonPin, INPUT);
   Serial.begin(9600);
   for(int x=1; x<=4; x++){
   int playertotal = drawTwo(x);
@@ -68,25 +72,55 @@ void setup() {
    Serial.println("-------------------------------------");
   }
 }
-
-int buttonPressed = 0;
+int standButtonPressed = 0;
+int hitButtonPressed = 0;
+bool inPlay = false;
 void loop(){
-//   int suitval = 0 + (rand() % static_cast<int>(3 - 0 + 1));
-// int cardval = 0 + (rand() % static_cast<int>(12 - 0 + 1));
-// if(checker[suitval][cardval] == 0){
-// Serial.println(cards[suitval][cardval]);
-// checker[suitval][cardval] = 1;
-// }
-buttonState = digitalRead(buttonPin);
-if(buttonState == HIGH && buttonPressed == 0){
-  buttonPressed = 1; 
-  hit();
+if(currentPlayer == 1 && inPlay == false){
+  currentPlayerTotal = total1;
 }
-if(buttonState == LOW && buttonPressed == 1){
-  buttonPressed = 0;
+if(currentPlayer == 2 && inPlay == false){
+  currentPlayerTotal = total2;
+}
+if(currentPlayer == 3 && inPlay == false){
+  currentPlayerTotal = total3;
+}
+if(currentPlayer == 4 && inPlay == false){
+  currentPlayerTotal = total4;
+}
+if(currentPlayer == 1 && inPlay == true){
+  total1  = currentPlayerTotal;
+}
+if(currentPlayer == 2 && inPlay == true){
+  total2  = currentPlayerTotal;
+}
+if(currentPlayer == 3 && inPlay == true){
+  total3  = currentPlayerTotal;
+}
+if(currentPlayer == 4 && inPlay == true){
+  total4  = currentPlayerTotal;
+}
+hitButtonState = digitalRead(hitButtonPin);
+if(hitButtonState == HIGH && hitButtonPressed == 0){
+  hitButtonPressed = 1; 
+  int nTotal = hit(currentPlayerTotal);
+  currentPlayerTotal = nTotal;
+  inPlay = true;
+}
+if(hitButtonState == LOW && hitButtonPressed == 1){
+  hitButtonPressed = 0;
+}
+standButtonState = digitalRead(standButtonPin);
+if(standButtonState == HIGH && standButtonPressed == 0){
+  standButtonPressed = 1; 
+  stand(currentPlayerTotal);
+}
+if(standButtonState == LOW && standButtonPressed == 1){
+  standButtonPressed = 0;
+}
 
-}
-bust();
+
+bust(currentPlayerTotal);
 
 }
 
@@ -130,18 +164,19 @@ if(turn == 2){
   }
 }
 }
-void bust(){
-if(total1 > 21){
+void bust(int total){
+if(total > 21){
   Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
-  delay(10000);
+  currentPlayer += 1;
+  inPlay = false;
 }
 } 
 
-void hit(){
-  if(total1 != 21){
+int hit(int total){
+  if(total != 21){
     int hitCard = drawCard();
     if(hitCard == 21){
-      if((total1 + 11) > 21){
+      if((total + 11) > 21){
         hitCard = 1;
       }
       else{
@@ -150,13 +185,21 @@ void hit(){
     }
     Serial.print("HIT: CARD DRAWN ");
     Serial.println(hitCard);
-    total1 += hitCard;
+    total += hitCard;
     Serial.print("NEW TOTAL: ");
-    Serial.println(total1);
+    Serial.println(total);
+    return total;
   }
 }
-void stand(){
-  
+void stand(int total){
+  if(total < 22){
+  Serial.print("STAND: PLAYER ");
+  Serial.print(currentPlayer);
+  Serial.print(" FINAL TOTAL:");
+  Serial.print(total);
+  currentPlayer += 1;
+  inPlay = false;
+  }
 }
 void compareToHouse(){
   
