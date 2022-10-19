@@ -1,4 +1,3 @@
-
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -95,10 +94,6 @@ void setup() {
   display.display();
   delay(2000);
   testdrawchar();
-  // display.display() is NOT necessary after every single drawing command,
-  // unless that's what you want...rather, you can batch up a bunch of
-  // drawing operations and then update the screen all at once by calling
-  // display.display(). These examples demonstrate both approaches...
 display.clearDisplay();
  display.drawRoundRect(30, 20, 30, 40, 5, WHITE);
   display.drawRoundRect(70, 20, 30, 40, 5, WHITE);
@@ -107,28 +102,15 @@ display.clearDisplay();
   c1Val();
   c2Val();
 display.display();
-     // Draw characters of the default font
-
 }
-
 void loop() {
 }
-
-
 void testdrawchar(void) {
   display.clearDisplay();
-
   display.setTextSize(2);      // Normal 1:1 pixel scale
   display.setTextColor(WHITE); // Draw white text
   display.setCursor(0, 30);     // Start at top-left corner
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
-
-  // Not all the characters will fit on the display. This is normal.
-  // Library will draw what it can and the rest will be clipped.
-  // for(int16_t i=0; i<256; i++) {
-  //   if(i == '\n') display.write(' ');
-  //   else          display.write(i);
-  // }
   display.write("HOLY MOLY GUACAMOLE");
   display.display();
   delay(2000);
