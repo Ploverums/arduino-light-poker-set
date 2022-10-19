@@ -1,3 +1,4 @@
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -94,23 +95,40 @@ void setup() {
   display.display();
   delay(2000);
   testdrawchar();
+  // display.display() is NOT necessary after every single drawing command,
+  // unless that's what you want...rather, you can batch up a bunch of
+  // drawing operations and then update the screen all at once by calling
+  // display.display(). These examples demonstrate both approaches...
 display.clearDisplay();
  display.drawRoundRect(30, 20, 30, 40, 5, WHITE);
   display.drawRoundRect(70, 20, 30, 40, 5, WHITE);
-  card1Heart();
-  card2Heart();
+  card1Spade();
+  card2Spade();
   c1Val();
   c2Val();
 display.display();
+     // Draw characters of the default font
+
 }
+
 void loop() {
 }
+
+
 void testdrawchar(void) {
   display.clearDisplay();
+
   display.setTextSize(2);      // Normal 1:1 pixel scale
   display.setTextColor(WHITE); // Draw white text
   display.setCursor(0, 30);     // Start at top-left corner
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
+
+  // Not all the characters will fit on the display. This is normal.
+  // Library will draw what it can and the rest will be clipped.
+  // for(int16_t i=0; i<256; i++) {
+  //   if(i == '\n') display.write(' ');
+  //   else          display.write(i);
+  // }
   display.write("HOLY MOLY GUACAMOLE");
   display.display();
   delay(2000);
@@ -120,6 +138,38 @@ void card1Heart(){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
    display.fillCircle(43, 28, 4, WHITE);
   display.fillCircle(52, 28, 4, WHITE);
   display.fillTriangle(39, 30, 56, 30, 47, 39, WHITE);
+}
+void card1Diamond(){
+display.fillTriangle(45, 30, 55, 30, 50, 38, WHITE);
+display.fillTriangle(45, 29, 55, 29, 50, 22, WHITE);
+}
+void card2Diamond(){
+display.fillTriangle(85, 30, 95, 30, 90, 38, WHITE);
+display.fillTriangle(85, 29, 95, 29, 90, 22, WHITE);
+}
+void card1Club(){
+	display.fillCircle(50, 24, 3, WHITE);
+	display.fillCircle(46, 30, 3, WHITE);
+	display.fillCircle(54, 30, 3, WHITE);
+	display.fillTriangle(48, 37, 52, 37, 50, 26, WHITE);
+}
+void card2Club(){
+	display.fillCircle(90, 24, 3, WHITE);
+	display.fillCircle(86, 30, 3, WHITE);
+	display.fillCircle(94, 30, 3, WHITE);
+	display.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+}
+void card1Spade(){
+	display.fillTriangle(48, 37, 52, 37, 50, 26, WHITE);
+	display.fillTriangle(44, 30, 56, 30, 50, 22, WHITE);
+	display.fillCircle(46, 30, 3, WHITE);
+	display.fillCircle(54, 30, 3, WHITE);
+}
+void card2Spade(){
+	display.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+	display.fillTriangle(84, 30, 96, 30, 90, 22, WHITE);
+	display.fillCircle(86, 30, 3, WHITE);
+	display.fillCircle(94, 30, 3, WHITE);
 }
 void card2Heart(){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
    display.fillCircle(83, 28, 4, WHITE);
