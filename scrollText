@@ -1,0 +1,37 @@
+// In this program we will make a pixel move randomly around the display
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_NeoMatrix.h>
+#include <Adafruit_NeoPixel.h>
+
+const int PIN = 6;  //Set the data pin on the Arduino
+const int SIZE = 16;  //We are using a 16x16 pixel matrix
+
+
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(SIZE, SIZE, PIN,              //This defines our matrix.
+  NEO_MATRIX_BOTTOM + NEO_MATRIX_LEFT + NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG, //Don't worry about these details
+  NEO_GRB + NEO_KHZ800);
+
+uint16_t col = matrix.Color(0, 255, 0);
+
+void setup() {  //Setup only runs once, no constants or variables should be declared here
+  matrix.begin();  //This starts the matrix
+  matrix.setBrightness(40);  //This sets the brightness of the pixel
+}
+
+int rand_pos() {return random(0,16);} //Return a random number from 0 to 15
+
+void loop() {  //The main program
+        //matrix.fillScreen(0);  // We want to clear the screen every time through the loop
+        for (int i = 16; i > -56; i -= 1) {
+        matrix.fillScreen(0);
+        matrix.fillRect(0,0,8,16,col);
+        matrix.setTextSize(1); 
+        matrix.setTextWrap(false);
+        matrix.setCursor(i, 0);
+        matrix.print("player 1");
+        matrix.show();  //Shows matrix
+        delay(50);  //Sets delay time
+        }
+        
+}
