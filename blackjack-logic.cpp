@@ -9,6 +9,7 @@
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SSD1306 display2(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define NUMFLAKES     10 // Number of snowflakes in the animation example
 
@@ -84,6 +85,8 @@ static const unsigned char PROGMEM bitmap[] =
 /*
 SET UP FOR BLACKJACK: ADJUST FOR POKER
 */
+int currCard = 2;
+int playerdisplay = 1;
 int total1 = 0;
 int total2 = 0;
 int total3 = 0;
@@ -114,13 +117,13 @@ Serial.println(cards[suitval][cardval]);
 checker[suitval][cardval] = 1;
 badDraw = false;
 if(cardval > 9){
-  if(cardval == 11){
+  if(cardval == 10){
     cardPick = "J";
   }
-   if(cardval == 12){
+   if(cardval == 11){
     cardPick = "Q";
   }
-   if(cardval == 13){
+   if(cardval == 12){
     cardPick = "K";
   }
   return 10;
@@ -143,21 +146,30 @@ int hitButtonState = 0;
 const int standButtonPin = 3;
 int standButtonState = 0;
 void setup() {
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display2.begin(SSD1306_SWITCHCAPVCC, 0x3D);
   srand(analogRead(0));
   pinMode(hitButtonPin, INPUT);
-  Serial.begin(115200);
+  Serial.begin(9600);
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
   display.clearDisplay();
+  display2.clearDisplay();
+
     display.drawBitmap(0, 0, bitmap, bitmap_height, bitmap_width, WHITE);
+    display2.drawBitmap(0, 0, bitmap, bitmap_height, bitmap_width, WHITE);
   display.display();
+  display2.display();
   delay(2000);
   display.clearDisplay();
-  for(int x=1; x<=1; x++){
+  display2.clearDisplay();
+  for(int x=1; x<=2; x++){
+    playerdisplay = x;
   int playertotal = drawTwo(x);
   display.display();
+  display2.display();
   Serial.print("PLAYER ");
   Serial.print(x);
   Serial.print(" TOTAL:");
@@ -176,6 +188,7 @@ void setup() {
   }
    Serial.println("-------------------------------------");
   }
+  playerdisplay = 1;
 }
 int standButtonPressed = 0;
 int hitButtonPressed = 0;
@@ -187,23 +200,11 @@ if(currentPlayer == 1 && inPlay == false){
 if(currentPlayer == 2 && inPlay == false){
   currentPlayerTotal = total2;
 }
-if(currentPlayer == 3 && inPlay == false){
-  currentPlayerTotal = total3;
-}
-if(currentPlayer == 4 && inPlay == false){
-  currentPlayerTotal = total4;
-}
 if(currentPlayer == 1 && inPlay == true){
   total1  = currentPlayerTotal;
 }
 if(currentPlayer == 2 && inPlay == true){
   total2  = currentPlayerTotal;
-}
-if(currentPlayer == 3 && inPlay == true){
-  total3  = currentPlayerTotal;
-}
-if(currentPlayer == 4 && inPlay == true){
-  total4  = currentPlayerTotal;
 }
 hitButtonState = digitalRead(hitButtonPin);
 if(hitButtonState == HIGH && hitButtonPressed == 0){
@@ -224,8 +225,9 @@ if(standButtonState == LOW && standButtonPressed == 1){
   standButtonPressed = 0;
 }
 
-
+if(currentPlayer < 3){
 bust(currentPlayerTotal);
+}
 
 }
 
@@ -274,6 +276,8 @@ void bust(int total){
 if(total > 21){
   Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
   currentPlayer += 1;
+  playerdisplay += 1;
+  currCard = 2;
   inPlay = false;
 }
 } 
@@ -294,8 +298,49 @@ int hit(int total){
     total += hitCard;
     Serial.print("NEW TOTAL: ");
     Serial.println(total);
+    drawNewCard(currCard);
+    currCard += 1;
     return total;
   }
+}
+void drawNewCard(int card){
+  if(playerdisplay == 1){
+  int x = card * 32;
+  display.drawRoundRect(0 + x, 20, 30, 40, 5, WHITE);
+  if(suitval == 0){
+    card1ClubD1(x);
+  }
+  if(suitval == 1){
+    card1DiamondD1(x);
+  }
+  if(suitval == 2){
+    card1HeartD1(x);
+  }
+  if(suitval == 3){
+    card1SpadeD1(x);
+  }
+  c1ValD1(x);
+
+  display.display();
+   }
+   if(playerdisplay == 2){
+  int x = card * 32;
+  display2.drawRoundRect(0 + x, 20, 30, 40, 5, WHITE);
+  if(suitval == 0){
+    card1ClubD2(x);
+  }
+  if(suitval == 1){
+    card1DiamondD2(x);
+  }
+  if(suitval == 2){
+    card1HeartD2(x);
+  }
+  if(suitval == 3){
+    card1SpadeD2(x);
+  }
+  c1ValD2(x);
+  display2.display();
+}
 }
 void stand(int total){
   if(total < 22){
@@ -304,6 +349,8 @@ void stand(int total){
   Serial.print(" FINAL TOTAL:");
   Serial.print(total);
   currentPlayer += 1;
+  playerdisplay += 1;
+  currCard = 2;
   inPlay = false;
   }
 }
@@ -329,96 +376,155 @@ void testdrawchar(void) {
   delay(2000);
 }
 
-void card1Heart(){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
-   display.fillCircle(43, 28, 4, WHITE);
-  display.fillCircle(52, 28, 4, WHITE);
-  display.fillTriangle(39, 30, 56, 30, 47, 39, WHITE);
+void card1HeartD1(int x){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
+   display.fillCircle(43 - 32 + x, 28, 4, WHITE);
+  display.fillCircle(52 - 32 + x, 28, 4, WHITE);
+  display.fillTriangle(39 - 32 + x, 30, 56 - 32 + x, 30, 47 - 32 + x, 39, WHITE);
 }
-void card1Diamond(){
-display.fillTriangle(45, 30, 55, 30, 50, 38, WHITE);
-display.fillTriangle(45, 29, 55, 29, 50, 22, WHITE);
+void card1DiamondD1(int x){
+display.fillTriangle(45 - 32 + x, 30, 55 - 32 + x, 30, 50 - 32 + x, 38, WHITE);
+display.fillTriangle(45 - 32 + x, 29, 55 - 32 + x, 29, 50 - 32 + x, 22, WHITE);
 }
-void card2Diamond(){
+void card2DiamondD1(){
 display.fillTriangle(85, 30, 95, 30, 90, 38, WHITE);
 display.fillTriangle(85, 29, 95, 29, 90, 22, WHITE);
 }
-void card1Club(){
-	display.fillCircle(50, 24, 3, WHITE);
-	display.fillCircle(46, 30, 3, WHITE);
-	display.fillCircle(54, 30, 3, WHITE);
-	display.fillTriangle(48, 37, 52, 37, 50, 26, WHITE);
+void card1ClubD1(int x){
+	display.fillCircle(50 - 32 + x, 24, 3, WHITE);
+	display.fillCircle(46 - 32 + x, 30, 3, WHITE);
+	display.fillCircle(54 - 32 + x, 30, 3, WHITE);
+	display.fillTriangle(48 - 32 + x, 37, 52 - 32 + x, 37, 50 - 32 + x, 26, WHITE);
 }
-void card2Club(){
-	display.fillCircle(90, 24, 3, WHITE);
-	display.fillCircle(86, 30, 3, WHITE);
-	display.fillCircle(94, 30, 3, WHITE);
-	display.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+// void card2ClubD1(){
+// 	display.fillCircle(90, 24, 3, WHITE);
+// 	display.fillCircle(86, 30, 3, WHITE);
+// 	display.fillCircle(94, 30, 3, WHITE);
+// 	display.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+// }
+void card1SpadeD1(int x){
+	display.fillTriangle(48 - 32 + x, 37, 52 - 32 + x, 37, 50 - 32 + x, 26, WHITE);
+	display.fillTriangle(44 - 32 + x, 30, 56 - 32 + x, 30, 50 - 32 + x, 22, WHITE);
+	display.fillCircle(46 - 32 + x, 30, 3, WHITE);
+	display.fillCircle(54 - 32 + x, 30, 3, WHITE);
 }
-void card1Spade(){
-	display.fillTriangle(48, 37, 52, 37, 50, 26, WHITE);
-	display.fillTriangle(44, 30, 56, 30, 50, 22, WHITE);
-	display.fillCircle(46, 30, 3, WHITE);
-	display.fillCircle(54, 30, 3, WHITE);
-}
-void card2Spade(){
-	display.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
-	display.fillTriangle(84, 30, 96, 30, 90, 22, WHITE);
-	display.fillCircle(86, 30, 3, WHITE);
-	display.fillCircle(94, 30, 3, WHITE);
-}
-void card2Heart(){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
-   display.fillCircle(83, 28, 4, WHITE);
-  display.fillCircle(92, 28, 4, WHITE);
-  display.fillTriangle(79, 30, 96, 30, 87, 39, WHITE);
-}
+// void card2SpadeD1(){
+// 	display.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+// 	display.fillTriangle(84, 30, 96, 30, 90, 22, WHITE);
+// 	display.fillCircle(86, 30, 3, WHITE);
+// 	display.fillCircle(94, 30, 3, WHITE);
+// }
+// void card2HeartD1(){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
+//    display.fillCircle(83, 28, 4, WHITE);
+//   display.fillCircle(92, 28, 4, WHITE);
+//   display.fillTriangle(79, 30, 96, 30, 87, 39, WHITE);
+// }
 
-void c1Val(){
+void c1ValD1(int x){
    display.setTextSize(2);      // Normal 1:1 pixel scale
   display.setTextColor(WHITE); // Draw white text
-  display.setCursor(35, 42);     // Start at top-left corner
+  display.setCursor(35 - 32 + x, 42);     // Start at top-left corner
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
   display.print(cardPick);
 }
-void c2Val(){
-   display.setTextSize(2);      // Normal 1:1 pixel scale
-  display.setTextColor(WHITE); // Draw white text
-  display.setCursor(75, 42);     // Start at top-left corner
-  display.cp437(true);         // Use full 256 char 'Code Page 437' font
-  display.print(cardPick);
+// void c2ValD1(){
+//    display.setTextSize(2);      // Normal 1:1 pixel scale
+//   display.setTextColor(WHITE); // Draw white text
+//   display.setCursor(75, 42);     // Start at top-left corner
+//   display.cp437(true);         // Use full 256 char 'Code Page 437' font
+//   display.print(cardPick);
+// }
+void card1HeartD2(int x){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
+   display2.fillCircle(43 - 32 + x, 28, 4, WHITE);
+  display2.fillCircle(52 - 32 + x, 28, 4, WHITE);
+  display2.fillTriangle(39 - 32 + x, 30, 56 - 32 + x, 30, 47 - 32 + x, 39, WHITE);
 }
+void card1DiamondD2(int x){
+display2.fillTriangle(45 - 32 + x, 30, 55 - 32 + x, 30, 50 - 32 + x, 38, WHITE);
+display2.fillTriangle(45 - 32 + x, 29, 55 - 32 + x, 29, 50 - 32 + x, 22, WHITE);
+}
+// void card2DiamondD2(){
+// display2.fillTriangle(85, 30, 95, 30, 90, 38, WHITE);
+// display2.fillTriangle(85, 29, 95, 29, 90, 22, WHITE);
+// }
+void card1ClubD2(int x){
+	display2.fillCircle(50 - 32 + x, 24, 3, WHITE);
+	display2.fillCircle(46 - 32 + x, 30, 3, WHITE);
+	display2.fillCircle(54 - 32 + x, 30, 3, WHITE);
+	display2.fillTriangle(48 - 32 + x, 37, 52 - 32 + x, 37, 50 - 32 + x, 26, WHITE);
+}
+// void card2ClubD2(){
+// 	display2.fillCircle(90, 24, 3, WHITE);
+// 	display2.fillCircle(86, 30, 3, WHITE);
+// 	display2.fillCircle(94, 30, 3, WHITE);
+// 	display2.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+// }
+void card1SpadeD2(int x){
+	display2.fillTriangle(48 - 32 + x, 37, 52 - 32 + x, 37, 50 - 32 + x, 26, WHITE);
+	display2.fillTriangle(44 - 32 + x, 30, 56 - 32 + x, 30, 50 - 32 + x, 22, WHITE);
+	display2.fillCircle(46 - 32 + x, 30, 3, WHITE);
+	display2.fillCircle(54 - 32 + x, 30, 3, WHITE);
+}
+// void card2SpadeD2(){
+// 	display2.fillTriangle(88, 37, 92, 37, 90, 26, WHITE);
+// 	display2.fillTriangle(84, 30, 96, 30, 90, 22, WHITE);
+// 	display2.fillCircle(86, 30, 3, WHITE);
+// 	display2.fillCircle(94, 30, 3, WHITE);
+// }
+// void card2HeartD2(){  //THIS HEART SUCKS BUT I CANT DO ANY BETTER RN
+//    display2.fillCircle(83, 28, 4, WHITE);
+//   display2.fillCircle(92, 28, 4, WHITE);
+//   display2.fillTriangle(79, 30, 96, 30, 87, 39, WHITE);
+// }
+
+void c1ValD2(int x){
+   display2.setTextSize(2);      // Normal 1:1 pixel scale
+  display2.setTextColor(WHITE); // Draw white text
+  display2.setCursor(35 - 32 + x, 42);     // Start at top-left corner
+  display2.cp437(true);         // Use full 256 char 'Code Page 437' font
+  display2.print(cardPick);
+}
+// void c2ValD2(){
+//    display2.setTextSize(2);      // Normal 1:1 pixel scale
+//   display2.setTextColor(WHITE); // Draw white text
+//   display2.setCursor(75, 42);     // Start at top-left corner
+//   display2.cp437(true);         // Use full 256 char 'Code Page 437' font
+//   display2.print(cardPick);
+// }
 void giveCard(int drawn){
-  if(drawn == 0){
-  display.drawRoundRect(30, 20, 30, 40, 5, WHITE);
+  if(playerdisplay == 1){
+    int x = drawn * 32;
+  display.drawRoundRect(0 + x, 20, 30, 40, 5, WHITE);
   if(suitval == 0){
-    card1Club();
+    card1ClubD1(x);
   }
   if(suitval == 1){
-    card1Diamond();
+    card1DiamondD1(x);
   }
   if(suitval == 2){
-    card1Heart();
+    card1HeartD1(x);
   }
   if(suitval == 3){
-    card1Spade();
+    card1SpadeD1(x);
   }
-  c1Val();
-  }
-  if(drawn == 1){
-  display.drawRoundRect(70, 20, 30, 40, 5, WHITE);
+  c1ValD1(x);
+}
+if (playerdisplay == 2){
+    int x = drawn * 32;
+  display2.drawRoundRect(0 + x, 20, 30, 40, 5, WHITE);
   if(suitval == 0){
-    card2Club();
+    card1ClubD2(x);
   }
   if(suitval == 1){
-    card2Diamond();
+    card1DiamondD2(x);
   }
   if(suitval == 2){
-    card2Heart();
+    card1HeartD2(x);
   }
   if(suitval == 3){
-    card2Spade();
+    card1SpadeD2(x);
   }
-  c2Val();
-  }
+  c1ValD2(x);
+}
 }
 #define XPOS   0 // Indexes into the 'icons' array in function below
 #define YPOS   1
