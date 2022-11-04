@@ -85,7 +85,8 @@ static const unsigned char PROGMEM bg[] = {
 	0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x10, 0x1c, 0x00, 0x03, 0xf8, 0x00, 0x7f, 0xff, 0xe0, 0x70, 
 	0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x10, 0x1f, 0xe0, 0x0f, 0xf8, 0x00, 0x7f, 0xff, 0xe0, 0x70
 };
-
+int ace = 0;
+int ace2 = 0;
 static const unsigned char PROGMEM bitmap[] =
 { 0xff, 0xff, 0xe0, 0x06, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0xff, 0xff, 0xf1, 0x08, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -203,8 +204,16 @@ else if(cardval> 0){
   return cardval += 1;
 }
 else{
+  if(playerdisplay == 1){
   cardPick = "A";
-  return 21;
+  ace += 1;
+  return 11;
+  }
+  if(playerdisplay == 2){
+     cardPick = "A";
+  ace2 += 1;
+  return 11;
+  }
 }
 }
   continue;
@@ -296,7 +305,8 @@ if(standButtonState == LOW && standButtonPressed == 1){
 }
 
 if(currentPlayer < 3){
-bust(currentPlayerTotal);
+  int playerTotal = currentPlayerTotal;
+currentPlayerTotal = bust(playerTotal);
 }
 
 }
@@ -311,13 +321,26 @@ int drawTwo(int player){
   giveCard(x);
   total += draw;
 }
-if(total > 21){
-  total -= 20;
-  if(total == 11){
-    total = 21;
+if(player == 1){
+if(ace > 0){
+  for(int x=1; x<=ace; x++){
+    if(total > 21){
+      total -= 10;
+      ace -= 1;
+    }
   }
 }
-
+}
+if(player == 2){
+  if(ace2 > 0){
+  for(int x=1; x<=ace2; x++){
+    if(total > 21){
+      total -= 10;
+      ace2 -= 1;
+    }
+  }
+}
+}
  return total;
 }
 void tableDraw(){
@@ -342,9 +365,12 @@ if(turn == 2){
   }
 }
 }
-void bust(int total){
+int bust(int total){
   if(playerdisplay == 1){
+   
 if(total > 21){
+       Serial.println(ace);
+  if(ace == 0){
   Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
   currentPlayer += 1;
   playerdisplay += 1;
@@ -356,10 +382,19 @@ if(total > 21){
   display.print("BUST"); 
   display.display();
   return;
+  }
+  else{
+    total -= 10;
+    ace -= 1;
+    return total;
+  }
 }
 } 
 if(playerdisplay == 2){
+
   if(total > 21){
+      Serial.println(ace2);
+    if(ace2 == 0){
   Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
   currentPlayer += 1;
   playerdisplay += 1;
@@ -371,6 +406,12 @@ if(playerdisplay == 2){
   display2.print("BUST"); 
   display2.display();
   return;
+}
+  else{
+    total -= 10;
+    ace2 -= 1;
+    return total;
+  }
 }
 }
 }
@@ -447,7 +488,7 @@ void stand(int total){
   display.setCursor(55, 35);
   display.print(total);
    display.setTextSize(1); 
-    display.setCursor(43, 15);
+    display.setCursor(43, 18);
     display.write("STAND:");
      display.setTextSize(2); 
   display.display();
@@ -470,7 +511,7 @@ void stand(int total){
   display2.setCursor(55, 35);
   display2.print(total);
    display2.setTextSize(1); 
-    display2.setCursor(43, 15);
+    display2.setCursor(43, 18);
     display2.write("STAND:");
      display2.setTextSize(2); 
   display2.display();
@@ -657,4 +698,3 @@ if (playerdisplay == 2){
 #define XPOS   0 // Indexes into the 'icons' array in function below
 #define YPOS   1
 #define DELTAY 2
-
