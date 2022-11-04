@@ -156,6 +156,10 @@ static const unsigned char PROGMEM bitmap[] =
 /*
 SET UP FOR BLACKJACK: ADJUST FOR POKER
 */
+bool houseStand = false;
+bool p1Bust = false;
+bool p2Bust = false;
+int ace3 = 0;
 int currCard = 2;
 int playerdisplay = 1;
 int total1 = 0;
@@ -220,9 +224,9 @@ else{
 }
 }
 int turn = 0;
-const int hitButtonPin = 2;
+int hitButtonPin = 2;
 int hitButtonState = 0;
-const int standButtonPin = 3;
+int standButtonPin = 3;
 int standButtonState = 0;
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
@@ -285,6 +289,10 @@ if(currentPlayer == 1 && inPlay == true){
 if(currentPlayer == 2 && inPlay == true){
   total2  = currentPlayerTotal;
 }
+if(currentPlayer == 2){
+  hitButtonPin = 4;
+  standButtonPin = 5;
+}
 hitButtonState = digitalRead(hitButtonPin);
 if(hitButtonState == HIGH && hitButtonPressed == 0){
   hitButtonPressed = 1; 
@@ -340,6 +348,16 @@ if(player == 2){
   }
 }
 }
+if(player == 3){
+    if(ace3 > 0){
+  for(int x=1; x<=ace3; x++){
+    if(total > 21){
+      total -= 10;
+      ace3 -= 1;
+    }
+  }
+}
+}
  return total;
 }
 void tableDraw(){
@@ -381,6 +399,7 @@ if(total > 21){
   display.setCursor(55, 35);
   display.print("BUST"); 
   display.display();
+  p1Bust = true;
   return total;
   }
   else{
@@ -406,7 +425,8 @@ if(playerdisplay == 2){
   display2.setCursor(55, 35);
   display2.print("BUST"); 
   display2.display();
-  return total;
+   p2Bust = true;
+  return 0;
 }
   else{
     total -= 10;
@@ -528,7 +548,54 @@ void stand(int total){
 }
 }
 void compareToHouse(){
+ int houseTotal = drawTwo(3);
+ while(houseStand == false || houseTotal < 22){
+   if(houseTotal < 18){
+   delay(2500);
+   houseTotal += hit(houseTotal);
+   }
+else{
+  houseStand1(houseTotal);
+}
+ }
+if(houseTotal > 21){
+  houseBust();
+}
+}
+void houseStand1(int x){
+  if(x > total1){
+
+  }
+  if(x < total1){
+
+  }
+  if(x == total1){
+
+  }
+    if(x > total2){
+
+  }
+  if(x < total2){
+
+  }
+  if(x == total2){
+    
+  }
+  houseStand = true;
+}
+void houseBust(){
+if(p1Bust == true){
+
+}
+if(p2Bust == true){
   
+}
+if(p1Bust == false){
+
+}
+if(p2Bust == false){
+  
+}
 }
 void testdrawchar(void) {
   display.clearDisplay();
@@ -697,6 +764,9 @@ if (playerdisplay == 2){
     card1SpadeD2(x);
   }
   c1ValD2(x);
+}
+if(playerdisplay == 3){
+  return;
 }
 }
 #define XPOS   0 // Indexes into the 'icons' array in function below
