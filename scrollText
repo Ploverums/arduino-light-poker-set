@@ -13,25 +13,70 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(SIZE, SIZE, PIN,              //T
   NEO_GRB + NEO_KHZ800);
 
 uint16_t col = matrix.Color(0, 255, 0);
+uint16_t col2 = matrix.Color(255, 0, 0);
+uint16_t col3 = matrix.Color(0, 0, 255);
 
 void setup() {  //Setup only runs once, no constants or variables should be declared here
   matrix.begin();  //This starts the matrix
   matrix.setBrightness(40);  //This sets the brightness of the pixel
 }
 
+void mamamia1() {
+  
+        matrix.setTextSize(1); 
+        matrix.setTextWrap(true);
+        matrix.setCursor(0,0);
+        matrix.print("11");
+        matrix.show();  //Shows matrix
+        delay(50); 
+}
+
+void peed() {
+  matrix.fillRect(0,0,8,16,col);
+  matrix.show();
+}
+
+void peedMK2() {
+  matrix.fillRect(8,0,8,16,col);
+  matrix.show();
+}
+
+
+void peed2() {
+  matrix.fillRect(0,0,8,16,col2);
+  matrix.show();
+}
+
+void peedMK22() {
+  matrix.fillRect(8,0,8,16,col2);
+  matrix.show();
+}
+
+
+void peed3() {
+  matrix.fillRect(0,0,8,16,col3);
+  matrix.show();
+}
+
+void peedMK23() {
+  matrix.fillRect(8,0,8,16,col3);
+  matrix.show();
+}
+
+void cleard() {
+  matrix.fillScreen(0);
+  matrix.show();
+}
+
 int rand_pos() {return random(0,16);} //Return a random number from 0 to 15
 
 void loop() {  //The main program
         //matrix.fillScreen(0);  // We want to clear the screen every time through the loop
-        for (int i = 16; i > -56; i -= 1) {
-        matrix.fillScreen(0);
-        matrix.fillRect(0,0,8,16,col);
-        matrix.setTextSize(1); 
-        matrix.setTextWrap(false);
-        matrix.setCursor(i, 0);
-        matrix.print("player 1");
-        matrix.show();  //Shows matrix
-        delay(50);  //Sets delay time
-        }
+         
+         //Sets delay time
+        cleard();
+        peedMK23();
+        peedMK22();
+        peedMK2();
         
 }
