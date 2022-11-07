@@ -2,7 +2,20 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_NeoMatrix.h>
+#include <Adafruit_NeoPixel.h>
 
+const int PIN = 6;  //Set the data pin on the Arduino
+const int SIZE = 16;  //We are using a 16x16 pixel matrix
+
+
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(SIZE, SIZE, PIN,              //This defines our matrix.
+  NEO_MATRIX_BOTTOM + NEO_MATRIX_LEFT + NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG, //Don't worry about these details
+  NEO_GRB + NEO_KHZ800);
+
+uint16_t col = matrix.Color(0, 255, 0);
+uint16_t col2 = matrix.Color(255, 0, 0);
+uint16_t col3 = matrix.Color(0, 0, 255);
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
@@ -223,12 +236,16 @@ else{
   continue;
 }
 }
+bool compareToHouseRun = false;
 int turn = 0;
 int hitButtonPin = 2;
 int hitButtonState = 0;
 int standButtonPin = 3;
 int standButtonState = 0;
 void setup() {
+    matrix.begin();  //This starts the matrix
+  matrix.setBrightness(40);
+  cleard();  //This sets the brightness of the pixel
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display2.begin(SSD1306_SWITCHCAPVCC, 0x3D);
   srand(analogRead(0));
@@ -279,9 +296,11 @@ bool inPlay = false;
 void loop(){
 if(currentPlayer == 1 && inPlay == false){
   currentPlayerTotal = total1;
+  peedl();
 }
 if(currentPlayer == 2 && inPlay == false){
   currentPlayerTotal = total2;
+  peedr();
 }
 if(currentPlayer == 1 && inPlay == true){
   total1  = currentPlayerTotal;
@@ -315,7 +334,9 @@ if(standButtonState == LOW && standButtonPressed == 1){
 if(currentPlayer < 3 && currentPlayerTotal > 21){
 currentPlayerTotal = bust(currentPlayerTotal);
 }
-
+if(currentPlayer == 3 && compareToHouseRun == false){
+  compareToHouse();
+}
 }
 
 int drawTwo(int player){
@@ -389,6 +410,7 @@ if(total > 21){
        Serial.println(ace);
   if(ace == 0){
   delay(1000);
+  cleard();
   Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
   currentPlayer += 1;
   playerdisplay += 1;
@@ -400,7 +422,7 @@ if(total > 21){
   display.print("BUST"); 
   display.display();
   p1Bust = true;
-  return total;
+  return 0;
   }
   else{
     total -= 10;
@@ -416,6 +438,7 @@ if(playerdisplay == 2){
     if(ace2 == 0){
       delay(1000);
   Serial.print("Bust! You broke now. ¯\_(ツ)_/¯");
+  cleard();
   currentPlayer += 1;
   playerdisplay += 1;
   currCard = 2;
@@ -518,6 +541,7 @@ void stand(int total){
   currentPlayer += 1;
   currCard = 2;
   ace = 0;
+  cleard();
   inPlay = false;
   return;
   }
@@ -548,13 +572,22 @@ void stand(int total){
 }
 }
 void compareToHouse(){
+  compareToHouseRun = true;
  int houseTotal = drawTwo(3);
+  cleard();
+ ma(houseTotal);
  while(houseStand == false || houseTotal < 22){
    if(houseTotal < 18){
+   
    delay(2500);
-   houseTotal += hit(houseTotal);
+     cleard();
+   houseTotal += (hit(houseTotal) - houseTotal);
+   ma(houseTotal);
+   delay(1500);
    }
 else{
+  delay(1500);
+  cleard();
   houseStand1(houseTotal);
 }
  }
@@ -563,38 +596,48 @@ if(houseTotal > 21){
 }
 }
 void houseStand1(int x){
+       cleard();
   if(x > total1){
-
+peed2l();
   }
   if(x < total1){
 
+peedl();
   }
   if(x == total1){
 
+peed3l();
   }
     if(x > total2){
 
+peed2r();
   }
   if(x < total2){
 
+peedr();
   }
   if(x == total2){
-    
+
+    peed3r();
   }
   houseStand = true;
 }
 void houseBust(){
+     cleard();
 if(p1Bust == true){
 
+peed3l();
 }
 if(p2Bust == true){
-  
+
+  peed3r();
 }
 if(p1Bust == false){
 
+peedl();
 }
 if(p2Bust == false){
-  
+  peedr();
 }
 }
 void testdrawchar(void) {
@@ -769,6 +812,53 @@ if(playerdisplay == 3){
   return;
 }
 }
+void ma(int x) {
+  
+        matrix.setTextSize(1); 
+        matrix.setTextWrap(true);
+        matrix.setCursor(0,0);
+        matrix.print(x);
+        matrix.show();  //Shows matrix
+        delay(50); 
+}
+
+void peedl() {
+  matrix.fillRect(0,0,8,16,col);
+  matrix.show();
+}
+
+void peedr() {
+  matrix.fillRect(8,0,8,16,col);
+  matrix.show();
+}
+
+
+void peed2l() {
+  matrix.fillRect(0,0,8,16,col2);
+  matrix.show();
+}
+
+void peed2r() {
+  matrix.fillRect(8,0,8,16,col2);
+  matrix.show();
+}
+
+
+void peed3l() {
+  matrix.fillRect(0,0,8,16,col3);
+  matrix.show();
+}
+
+void peed3r() {
+  matrix.fillRect(8,0,8,16,col3);
+  matrix.show();
+}
+
+void cleard() {
+  matrix.fillScreen(0);
+  matrix.show();
+}
+
 #define XPOS   0 // Indexes into the 'icons' array in function below
 #define YPOS   1
 #define DELTAY 2
